@@ -68,9 +68,16 @@ public class StoreService {
     public ClientDto getAllClientInfo(Integer clientId) {
         Client client = findClientById(clientId);
         ClientDto clientDto = toDto(client, ClientDto.class);
-        List<Order> orderList = client.getOrdersHistory();
-        List<OrderDto> orderDtoList = allToDto(orderList, OrderDto.class);
-        clientDto.setOrderDtoList(orderDtoList);
+
+//        Если не вытягиваю отдельно "orderList" у клиента, то он не мапит его как OrderDto
+//        и в ClientDto "orderDtoList=null"
+//
+//        А если делаю так, как ниже, то всё ок.
+
+//        List<Order> orderList = client.getOrdersHistory();
+//        List<OrderDto> orderDtoList = allToDto(orderList, OrderDto.class);
+//        clientDto.setOrderDtoList(orderDtoList);
+
         log.info("{}", clientDto);
         return clientDto;
     }
