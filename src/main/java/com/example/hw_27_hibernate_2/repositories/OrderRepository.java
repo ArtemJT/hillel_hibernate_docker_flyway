@@ -1,9 +1,9 @@
 package com.example.hw_27_hibernate_2.repositories;
 
-import com.example.hw_27_hibernate_2.entities.Product;
+import com.example.hw_27_hibernate_2.entities.Order;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface ProductRepo extends CrudRepository<Product, Integer> {
+public interface OrderRepository extends CrudRepository<Order, Integer> {
 }

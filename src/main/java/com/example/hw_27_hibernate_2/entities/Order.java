@@ -21,6 +21,7 @@ public class Order {
     @JoinColumn(name = "fk_client_id")
     private Client client;
 
-    @OneToMany(mappedBy = "order", fetch = FetchType.EAGER)
+//    @OneToMany(mappedBy = "order", fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "order")
     private List<OrderItem> orderItemList;
 }

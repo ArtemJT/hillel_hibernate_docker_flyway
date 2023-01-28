@@ -53,14 +53,14 @@ public class Hw27Hibernate2Application {
 //        );
 //
 //        storeService.createOrder(2, productMap);
-//
-//        storeService.getClientInfoById(3);
-//
-//        storeService.getClientOrdersById(2);
-//
+
+        storeService.getClientInfoById(3);
+
+        storeService.getClientOrdersById(2);
+
         storeService.getAllClientInfo(2);
 
-//        storeService.findAllClients();
+        storeService.findAllClients();
     }
 
     private void addProducts(int quantity) {

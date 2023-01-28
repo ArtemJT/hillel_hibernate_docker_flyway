@@ -29,6 +29,7 @@ public class Client {
     @OneToOne(mappedBy = "client")
     private Address address;
 
-    @OneToMany(mappedBy = "client", fetch = FetchType.EAGER)
+//    @OneToMany(mappedBy = "client", fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "client")
     private List<Order> ordersHistory;
 }

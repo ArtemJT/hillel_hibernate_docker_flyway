@@ -8,6 +8,7 @@ import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -19,24 +20,25 @@ import static com.example.hw_27_hibernate_2.utilities.Mapper.*;
 @Service
 @RequiredArgsConstructor
 @Slf4j
+@Transactional
 public class StoreService {
 
-    private final AddressRepo addressRepo;
-    private final ClientRepo clientRepo;
-    private final OrderRepo orderRepo;
-    private final OrderItemRepo orderItemRepo;
-    private final ProductRepo productRepo;
+    private final AddressRepository addressRepository;
+    private final ClientRepository clientRepository;
+    private final OrderRepository orderRepository;
+    private final OrderItemRepository orderItemRepository;
+    private final ProductRepository productRepository;
 
     public ProductDto addProduct(ProductDto productDto) {
         Product product = toEntity(productDto, Product.class);
-        productRepo.save(product);
+        productRepository.save(product);
         productDto.setId(product.getId());
         log.info("PRODUCT ADDED: {}", productDto);
         return productDto;
     }
 
     public List<ProductDto> findAllProducts() {
-        List<Product> productList = Streams.stream(productRepo.findAll()).toList();
+        List<Product> productList = Streams.stream(productRepository.findAll()).toList();
         List<ProductDto> productDtoList = allToDto(productList, ProductDto.class);
         logCollection(productDtoList);
         return productDtoList;
@@ -44,11 +46,11 @@ public class StoreService {
 
     public ClientInfoDto addClient(ClientInfoDto clientInfoDto, AddressDto addressDto) {
         Client client = toEntity(clientInfoDto, Client.class);
-        clientRepo.save(client);
+        clientRepository.save(client);
 
         Address address = toEntity(addressDto, Address.class);
         address.setClient(client);
-        addressRepo.save(address);
+        addressRepository.save(address);
 
         addressDto.setId(address.getId());
 
@@ -59,7 +61,7 @@ public class StoreService {
     }
 
     public List<ClientDto> findAllClients() {
-        List<Client> clientList = Streams.stream(clientRepo.findAll()).toList();
+        List<Client> clientList = Streams.stream(clientRepository.findAll()).toList();
         return clientList.stream()
                 .map(client -> getAllClientInfo(client.getId()))
                 .toList();
@@ -68,15 +70,13 @@ public class StoreService {
     public ClientDto getAllClientInfo(Integer clientId) {
         Client client = findClientById(clientId);
         ClientDto clientDto = toDto(client, ClientDto.class);
-
-//        Если не вытягиваю отдельно "orderList" у клиента, то он не мапит его как OrderDto
-//        и в ClientDto "orderDtoList=null"
+//        Если делаю только мапинг "ClientDto" и не вытягиваю отдельно "orderList" у клиента,
+//        то он не мапит его как OrderDto и в ClientDto "orderDtoList=null".
 //
 //        А если делаю так, как ниже, то всё ок.
-
-//        List<Order> orderList = client.getOrdersHistory();
-//        List<OrderDto> orderDtoList = allToDto(orderList, OrderDto.class);
-//        clientDto.setOrderDtoList(orderDtoList);
+        List<Order> orderList = client.getOrdersHistory();
+        List<OrderDto> orderDtoList = allToDto(orderList, OrderDto.class);
+        clientDto.setOrderDtoList(orderDtoList);
 
         log.info("{}", clientDto);
         return clientDto;
@@ -98,12 +98,12 @@ public class StoreService {
     }
 
     public AddressDto changeAddress(Integer clientId, AddressDto addressDto) {
-        boolean clientExistsById = clientRepo.existsById(clientId);
+        boolean clientExistsById = clientRepository.existsById(clientId);
         if (!clientExistsById) {
             throw new EntityNotFoundException("CLIENT WITH ID=" + clientId + " NOT FOUND");
         }
 
-        Integer addressId = addressRepo.updateAddressForClient(
+        Integer addressId = addressRepository.updateAddressForClient(
                 addressDto.getCountry(),
                 addressDto.getCity(),
                 addressDto.getStreet(),
@@ -121,11 +121,11 @@ public class StoreService {
         Order order = new Order();
         order.setClient(client);
 
-        orderRepo.save(order);
+        orderRepository.save(order);
 
         List<OrderItem> orderItemList = new ArrayList<>();
         for (Map.Entry<Integer, Integer> entry : productMap.entrySet()) {
-            Product product = productRepo.findById(entry.getKey()).orElseThrow(EntityNotFoundException::new);
+            Product product = productRepository.findById(entry.getKey()).orElseThrow(EntityNotFoundException::new);
             Integer count = entry.getValue();
 
             OrderItem orderItem = new OrderItem();
@@ -133,7 +133,7 @@ public class StoreService {
             orderItem.setProduct(product);
             orderItem.setOrder(order);
 
-            orderItemRepo.save(orderItem);
+            orderItemRepository.save(orderItem);
         }
         order.setOrderItemList(orderItemList);
 
@@ -143,7 +143,7 @@ public class StoreService {
     }
 
     private Client findClientById(Integer clientId) {
-        return clientRepo.findById(clientId).orElseThrow(EntityNotFoundException::new);
+        return clientRepository.findById(clientId).orElseThrow(EntityNotFoundException::new);
     }
 
     private void logCollection(Collection<?> list) {
