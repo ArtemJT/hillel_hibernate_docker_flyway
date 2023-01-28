@@ -28,7 +28,7 @@ public class Hw27Hibernate2Application {
     @EventListener(ApplicationReadyEvent.class)
     public void init() {
 //        addProducts(9);
-
+//
 //        storeService.findAllProducts();
 //
 //        AddressDto addressDto = new AddressDto(null, "Country-1", "City-1", "Street-1", "House-1");
